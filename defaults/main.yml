@@ -1,0 +1,56 @@
+---
+
+nginx_group: "www-data"
+nginx_php_force_cgi_redirect: false
+nginx_user: "www-data"
+nginx_worker_connections: 1024
+nginx_worker_processes: "{{ ansible_processor_count }}"
+nginx_www_dir: "/var/www"
+
+nginx_http_params:
+    client_body_timeout: "10m"
+    client_header_buffer_size: "1k"
+    client_header_timeout: "10m"
+    connection_pool_size: 256
+    ignore_invalid_headers: "on"
+    keepalive_timeout: "75 20"
+    large_client_header_buffers: "4 2k"
+    output_buffers: "1 32k"
+    postpone_output: 1460
+    request_pool_size: "4k"
+    send_timeout: "10m"
+    sendfile: "on"
+    server_names_hash_bucket_size: 64
+    tcp_nodelay: "on"
+    tcp_nopush: "on"
+    types_hash_max_size: 2048
+
+nginx_servers: []
+
+# nginx_servers:
+#   - name: "localhost"
+#     server_name: "localhost"
+#     listen: 80
+#     settings:
+#       - "root {{ nginx_www_dir}}/localhost"
+#     locations:
+#       - name: "/"
+#         settings:
+#           - "try_files $uri $uri/ /index.html"
+#   - name: "my_php_site"
+#     server_name: "my.php.site.com"
+#     listen: 80
+#     settings:
+#       - "root {{ nginx_www_dir}}/my_php_site"
+#     locations:
+#       - name: "/"
+#         settings:
+#           - "try_files $uri $uri/ /index.php?$args"
+#       - name: "~ \\.php$"
+#         settings:
+#           - "fastcgi_pass 127.0.0.1:9000"
+#           - "fastcgi_index index.php"
+#           - "include fastcgi_params"
+#           - "fastcgi_param PATH_INFO $fastcgi_script_name"
+#           - "fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name"
+#           - "fastcgi_param SERVER_NAME $host"

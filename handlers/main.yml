@@ -1,0 +1,10 @@
+---
+
+- name: restart nginx
+  service: name=nginx state=restarted
+  register: restarted_nginx
+  when: not started_nginx|changed
+
+- name: reload nginx
+  service: name=nginx state=reloaded
+  when: restarted_nginx is not defined or not restarted_nginx|changed

@@ -1,0 +1,19 @@
+server {
+    listen {{ item.listen }};
+    server_name {{ item.server_name }};
+
+    access_log /var/log/nginx/{{ item.name }}.access_log main;
+    error_log /var/log/nginx/{{ item.name }}.error_log warn;
+
+{% for entry in item.settings %}
+    {{ entry }};
+{% endfor %}
+{% for location in item.locations %}
+
+    location {{ location.name }} {
+{% for entry in location.settings %}
+        {{ entry }};
+{% endfor %}
+    }
+{% endfor %}
+}

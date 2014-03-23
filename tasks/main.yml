@@ -1,0 +1,55 @@
+---
+
+- name: install nginx
+  apt: pkg=nginx-light state=present
+
+- name: create config directories
+  file: "path=/etc/nginx/{{ item }} state=directory owner=root group=root mode=0755"
+  with_items:
+    - sites-available
+    - sites-enabled
+
+- name: remove dist servers
+  file: "dest=/etc/nginx/sites-{{ item[0] }}/{{ item[1] }} state=absent"
+  with_nested:
+    - ["enabled", "available"]
+    - ["default"]
+
+- name: create www directory
+  file: "path={{ nginx_www_dir }} state=directory owner={{ nginx_user }} group={{ nginx_group }} mode=0755"
+
+- name: write nginx.conf
+  template: "src=nginx.conf.j2 dest=/etc/nginx/nginx.conf owner=root group=root mode=0644"
+  notify:
+    - restart nginx
+
+- name: write fastcgi_params
+  template: "src=fastcgi_params.j2 dest=/etc/nginx/fastcgi_params owner=root group=root mode=0644"
+  notify:
+    - reload nginx
+
+- name: write default server
+  copy: "src=default.conf dest=/etc/nginx/sites-available/default.conf owner=root group=root mode=0644"
+  notify:
+    - reload nginx
+
+- name: activate default server
+  file: "src=/etc/nginx/sites-available/default.conf dest=/etc/nginx/sites-enabled/default.conf state=link"
+  notify:
+    - reload nginx
+
+- name: write other servers
+  template: "src=server.j2 dest=/etc/nginx/sites-available/{{ item.name }}.conf owner=root group=root mode=0644"
+  with_items: nginx_servers
+  notify:
+    - reload nginx
+
+- name: activate other servers
+  file: "src=/etc/nginx/sites-available/{{ item.name }}.conf dest=/etc/nginx/sites-enabled/{{ item.name }}.conf state=link"
+  with_items: nginx_servers
+  notify:
+    - reload nginx
+
+- name: start nginx
+  service: name=nginx enabled=yes state=started
+  register: started_nginx
