@@ -1,4 +1,15 @@
 ---
-
+galaxy_info:
+  author: "Jasper N. Brouwer, Ramon de la Fuente"
+  description: Install and start Nginx
+  company: Future500
+  license: LGPL
+  min_ansible_version: 1.4
+  platforms:
+  - name: Debian
+    versions:
+      - wheezy
+  categories:
+    - web
 dependencies:
-  - repo_dotdeb
+  - f500.repo_dotdeb
