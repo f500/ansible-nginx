@@ -30,11 +30,13 @@
 
 - name: write default server
   copy: "src=default.conf dest=/etc/nginx/sites-available/default.conf owner=root group=root mode=0644"
+  when: nginx_set_default_server
   notify:
     - reload nginx
 
 - name: activate default server
   file: "src=/etc/nginx/sites-available/default.conf dest=/etc/nginx/sites-enabled/default.conf state=link"
+  when: nginx_set_default_server
   notify:
     - reload nginx
 

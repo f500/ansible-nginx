@@ -39,6 +39,11 @@ All variables have sane defaults, but the following can be set:
         tcp_nopush: "on"
         types_hash_max_size: 2048
 
+The role sets a default nginx server to return 404. If you do not wish to write a default
+server config file, you can set this to no:
+
+    nginx_set_default_server: yes
+
 The role also supports adding additional nginx servers, see the /defaults/main.yml file
 for an example of how to add server(s). Default is an empty list:
 

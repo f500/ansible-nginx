@@ -25,6 +25,7 @@ nginx_http_params:
     tcp_nopush: "on"
     types_hash_max_size: 2048
 
+nginx_set_default_server: yes
 nginx_servers: []
 
 # nginx_servers:
