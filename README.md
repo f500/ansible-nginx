@@ -7,7 +7,7 @@ Removes the default server, and replaces it with a default 404 not-found server 
 Requirements
 ------------
 
-Debian Wheezy with the package python-pycurl and python-software-properties installed.
+Debian Wheezy/Jessie with the package python-pycurl and python-software-properties installed.
 
 Role Variables
 --------------
@@ -17,6 +17,7 @@ All variables have sane defaults, but the following can be set:
     nginx_group: "www-data"
     nginx_php_force_cgi_redirect: false
     nginx_user: "www-data"
+    nginx_pid: "/run/nginx.pid"
     nginx_worker_connections: 1024
     nginx_worker_processes: "{{ ansible_processor_count }}"
     nginx_www_dir: "/var/www"
@@ -27,6 +28,8 @@ All variables have sane defaults, but the following can be set:
         client_header_timeout: "10m"
         connection_pool_size: 256
         ignore_invalid_headers: "on"
+        gzip: "on"
+        gzip_disable: "msie6"
         keepalive_timeout: "75 20"
         large_client_header_buffers: "4 2k"
         output_buffers: "1 32k"
@@ -35,9 +38,12 @@ All variables have sane defaults, but the following can be set:
         send_timeout: "10m"
         sendfile: "on"
         server_names_hash_bucket_size: 64
+        server_tokens: "off"
+        ssl_prefer_server_ciphers: "on"
+        ssl_protocols: "TLSv1 TLSv1.1 TLSv1.2"
         tcp_nodelay: "on"
         tcp_nopush: "on"
-        types_hash_max_size: 2048
+        types_hash_max_size: 2048    
 
 The role sets a default nginx server to return 404. If you do not wish to write a default
 server config file, you can set this to no:
