@@ -1,5 +1,6 @@
 user {{ nginx_user }} {{ nginx_group }};
 worker_processes {{ nginx_worker_processes }};
+pid {{ nginx_pid }};
 
 events {
     worker_connections {{ nginx_worker_connections }};
