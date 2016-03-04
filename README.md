@@ -67,6 +67,38 @@ Example Playbook
       roles:
          - { role: f500.nginx }
 
+Example of Nginx vhost with php7-fpm
+-------------------------------------
+
+server {
+
+    listen    80;
+    server_name     example.com ;
+    root            /var/www/example--com;
+
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+    
+    location ~ [^/]\.php(/|$) {
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        if (!-f $document_root$fastcgi_script_name) {
+            return 404;
+        }
+
+        # Uncomment one of the next 2 lines accordingly to the output of this command
+        # cat /etc/php/7.0/fpm/pool.d/www.conf | grep "^listen "
+        #
+        #fastcgi_pass 127.0.0.1:9001;
+        fastcgi_pass unix:/var/run/php7.0-fpm.sock;
+        
+        fastcgi_index index.php;
+        include fastcgi_params;
+    }
+}
+
 License
 -------
 
