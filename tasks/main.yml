@@ -42,13 +42,13 @@
 
 - name: write other servers
   template: "src=server.j2 dest=/etc/nginx/sites-available/{{ item.name }}.conf owner=root group=root mode=0644"
-  with_items: nginx_servers
+  with_items: "{{ nginx_servers }}"
   notify:
     - reload nginx
 
 - name: activate other servers
   file: "src=/etc/nginx/sites-available/{{ item.name }}.conf dest=/etc/nginx/sites-enabled/{{ item.name }}.conf state=link"
-  with_items: nginx_servers
+  with_items: "{{ nginx_servers }}"
   notify:
     - reload nginx
 
