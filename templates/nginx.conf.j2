@@ -1,29 +1,37 @@
-user {{ nginx_user }} {{ nginx_group }};
-worker_processes {{ nginx_worker_processes }};
-pid {{ nginx_pid }};
+user              {{ nginx_user }} {{ nginx_group }};
+worker_processes  {{ nginx_worker_processes }};
+pid               {{ nginx_pid }};
 
 events {
-    worker_connections {{ nginx_worker_connections }};
+    worker_connections  {{ nginx_worker_connections }};
     use epoll;
 }
 
 http {
-    include mime.types;
-    default_type application/octet-stream;
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
 
-    log_format main
-        '$remote_addr - $remote_user [$time_local] '
-        '"$request" $status $bytes_sent '
-        '"$http_referer" "$http_user_agent" '
-        '"$gzip_ratio"';
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log /var/log/nginx/access.log main;
-    error_log /var/log/nginx/error.log warn;
+    access_log  /var/log/nginx/access.log  main;
+    error_log   /var/log/nginx/error.log   warn;
 
-{% for key, value in nginx_http_params.iteritems() %}
-    {{ key }} {{ value }};
+{% for key, value in (nginx_http_params_default|combine(nginx_http_params)).iteritems() %}
+{% if key == 'add_header' %}
+{% for header in value %}
+    add_header  {{ header }};
+{% endfor %}
+{% elif value is sameas True %}
+    {{ key }}  on;
+{% elif value is sameas False %}
+    {{ key }}  off;
+{% else %}
+    {{ key }}  {{ value }};
+{% endif %}
 {% endfor %}
 
-    include conf.d/*.conf;
-    include sites-enabled/*;
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*.conf;
 }
