@@ -55,13 +55,24 @@ The result is the same as if configured in the following way:
         ssl_stapling_verify: on
         resolver: "{{ ansible_dns.nameservers|join(' ') }} valid=300s"
         resolver_timeout: 5s
-        add_header:
-        - 'Strict-Transport-Security "max-age=63072000 includeSubDomains preload"'
-        - X-Content-Type-Options nosniff
-        - X-Frame-Options DENY
+        add_header: "{{ nginx_add_headers }}"
 
 If you want to change one of these settings, add it to `nginx_http_params`.
 No need to copy the entire dictionary.
+
+Some SSL related headers are included by default:
+
+    nginx_add_headers:
+      - 'Strict-Transport-Security "max-age=63072000 includeSubDomains preload"  always'
+      - X-Content-Type-Options nosniff  always
+      - X-Frame-Options DENY  always
+
+Note that when you use `add_header` in a `server` or `location` block, that will completely override the headers that are placed in the `http` block.
+To work around this, you can use a union of the "global" headers and your custom headers:
+
+    {% for header in nginx_add_headers | union(custom_headers) %}
+    add_header  {{ header }};
+    {% endfor %}
 
 We generate Diffie-Hellman parameters to enable Perfect Forward Secrecy.
 You can change the number of bits used for this:

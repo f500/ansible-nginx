@@ -11,6 +11,11 @@ nginx_use_realpath_root: no
 nginx_php_force_cgi_redirect: no
 nginx_set_default_server: yes
 
+nginx_add_headers:
+  - 'Strict-Transport-Security "max-age=63072000 includeSubDomains preload"  always'
+  - X-Content-Type-Options nosniff  always
+  - X-Frame-Options DENY  always
+
 nginx_dhparam_bits: 4096
 
 nginx_http_params_default:
@@ -37,10 +42,7 @@ nginx_http_params_default:
   ssl_stapling_verify: on
   resolver: "{{ ansible_dns.nameservers|join(' ') }} valid=300s"
   resolver_timeout: 5s
-  add_header:
-    - 'Strict-Transport-Security "max-age=63072000 includeSubDomains preload"'
-    - X-Content-Type-Options nosniff
-    - X-Frame-Options DENY
+  add_header: "{{ nginx_add_headers }}"
 
 nginx_http_params: {}
 
