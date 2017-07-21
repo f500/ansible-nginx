@@ -32,46 +32,55 @@ This role sets a couple of settings that are viewed as best practices.
 The result is the same as if configured in the following way:
 
     nginx_http_params:
-        server_names_hash_bucket_size: 64
-        server_tokens: off
+      server_names_hash_bucket_size: 64
+      server_tokens: off
 
-        sendfile: on
-        tcp_nopush: on
-        tcp_nodelay: on
+      sendfile: on
+      tcp_nopush: on
+      tcp_nodelay: on
 
-        gzip: on
-        gzip_disable: "msie6"
-        gzip_min_length: 256
-        gzip_types: application/json application/vnd.ms-fontobject application/x-font-ttf application/x-javascript application/xml application/xml+rss font/opentype image/svg+xml image/x-icon text/css text/javascript text/plain text/xml
+      gzip: on
+      gzip_disable: "msie6"
+      gzip_min_length: 256
+      gzip_types: application/json application/vnd.ms-fontobject application/x-font-ttf application/x-javascript application/xml application/xml+rss font/opentype image/svg+xml image/x-icon text/css text/javascript text/plain text/xml
 
-        ssl_ciphers: '"EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH"'
-        ssl_dhparam: "/etc/nginx/dh{{ nginx_dhparam_bits }}.pem"
-        ssl_ecdh_curve: secp384r1
-        ssl_prefer_server_ciphers: on
-        ssl_protocols: TLSv1.2
-        ssl_session_cache: shared:SSL:10m
-        ssl_session_tickets: off
-        ssl_stapling: on
-        ssl_stapling_verify: on
-        resolver: "{{ ansible_dns.nameservers|join(' ') }} valid=300s"
-        resolver_timeout: 5s
-        add_header: "{{ nginx_add_headers }}"
+      ssl_ciphers: "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS"
+      ssl_dhparam: "/etc/nginx/dh{{ nginx_dhparam_bits }}.pem"
+      ssl_prefer_server_ciphers: on
+      ssl_protocols: TLSv1 TLSv1.1 TLSv1.2
+      ssl_session_cache: shared:SSL:50m
+      ssl_session_tickets: off
+      ssl_session_timeout: 1d
+      ssl_stapling: on
+      ssl_stapling_verify: on
+      resolver: "{{ ansible_dns.nameservers|join(' ') }} valid=300s"
 
 If you want to change one of these settings, add it to `nginx_http_params`.
 No need to copy the entire dictionary.
 
-Some SSL related headers are included by default:
+Add or change headers added in the `http` context:
 
-    nginx_add_headers:
-      - 'Strict-Transport-Security "max-age=63072000 includeSubDomains preload"  always'
-      - X-Content-Type-Options nosniff  always
-      - X-Frame-Options DENY  always
+    nginx_http_headers: {}
 
-Note that when you use `add_header` in a `server` or `location` block, that will completely override the headers that are placed in the `http` block.
-To work around this, you can use a union of the "global" headers and your custom headers:
+This role adds a couple of headers that are viewed as best practices.
+The result is the same as if configured in the following way:
 
-    {% for header in nginx_add_headers | union(custom_headers) %}
-    add_header  {{ header }};
+    nginx_http_headers:
+      Content-Security-Policy: "default-src 'self'; form-action 'self'; frame-ancestors 'none'"
+      Referrer-Policy: "no-referrer, strict-origin-when-cross-origin"
+      Strict-Transport-Security: max-age=15768000
+      X-Content-Type-Options: nosniff
+      X-Frame-Options: DENY
+      X-Xss-Protection: "1; mode=block"
+
+If you want to change one of these headers, add it to `nginx_http_headers`.
+Again, no need to copy the entire dictionary.
+
+Note that headers added to the `http` context will be ignored when you add headers in a `server` or `location` context.
+So don't forget to combine all headers:
+
+    {% for key, value in (nginx_http_headers_default | combine(nginx_http_headers) | combine(specialized_headers)).iteritems() %}
+    add_header  {{ key }} "{{ value }}"  always;
     {% endfor %}
 
 We generate Diffie-Hellman parameters to enable Perfect Forward Secrecy.
