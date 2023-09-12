@@ -40,7 +40,7 @@
     - sites-enabled
 
 - name: Generate Diffie-Hellman parameters
-  command: "openssl dhparam -out /etc/nginx/dh{{ nginx_dhparam_bits }}.pem {{ nginx_dhparam_bits }}"
+  command: "openssl dhparam -dsaparam -out /etc/nginx/dh{{ nginx_dhparam_bits }}.pem {{ nginx_dhparam_bits }}"
   args:
     creates: "/etc/nginx/dh{{ nginx_dhparam_bits }}.pem"
 
