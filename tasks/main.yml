@@ -1,9 +1,11 @@
 ---
 
 - name: Add the nginx.org trusted key
-  apt_key:
-    id: 7BD9BF62
-    url: http://nginx.org/keys/nginx_signing.key
+  ansible.builtin.get_url:
+    url: "http://nginx.org/keys/nginx_signing.key"
+    dest: /etc/apt/trusted.gpg.d/nginx.asc
+    mode: '0644'
+    force: true
 
 - name: Add the nginx.org repository
   apt_repository:
