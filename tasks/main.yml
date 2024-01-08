@@ -41,10 +41,14 @@
     - sites-available
     - sites-enabled
 
-- name: Generate Diffie-Hellman parameters
-  command: "openssl dhparam -dsaparam -out /etc/nginx/dh{{ nginx_dhparam_bits }}.pem {{ nginx_dhparam_bits }}"
-  args:
-    creates: "/etc/nginx/dh{{ nginx_dhparam_bits }}.pem"
+- name: Copy dhparam file
+  copy:
+      src: ffdhe4096.pem
+      dest: /etc/nginx/dh{{ nginx_dhparam_bits }}.pem
+      owner: root
+      group: root
+      mode: 0644
+  notify: Restart nginx
 
 - name: Write nginx.conf
   template:
