@@ -1,75 +1,76 @@
 ---
-
 - name: Add the nginx.org trusted key
   ansible.builtin.get_url:
     url: "http://nginx.org/keys/nginx_signing.key"
     dest: /etc/apt/trusted.gpg.d/nginx.asc
-    mode: '0644'
+    mode: "0644"
     force: true
 
 - name: Add the nginx.org repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb http://nginx.org/packages/debian/ {{ ansible_distribution_release }} nginx"
-    update_cache: no
+    update_cache: false
 
 - name: Add the nginx.org source repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb-src http://nginx.org/packages/debian/ {{ ansible_distribution_release }} nginx"
-    update_cache: yes
+    update_cache: true
 
 - name: Install nginx
-  apt:
+  ansible.builtin.apt:
     name: nginx
 
-- name: create www directory
-  file:
+- name: Create www directory
+  ansible.builtin.file:
     path: "{{ nginx_www_dir }}"
     state: directory
     owner: "{{ nginx_user }}"
     group: "{{ nginx_group }}"
-    mode: 0755
+    mode: "0755"
 
 - name: Create config directories
-  file:
+  ansible.builtin.file:
     path: "/etc/nginx/{{ item }}"
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
   with_items:
     - conf.d
     - sites-available
     - sites-enabled
 
 - name: Copy dhparam file
-  copy:
-      src: ffdhe4096.pem
-      dest: /etc/nginx/dh{{ nginx_dhparam_bits }}.pem
-      owner: root
-      group: root
-      mode: 0644
+  ansible.builtin.copy:
+    src: ffdhe4096.pem
+    dest: /etc/nginx/dh{{ nginx_dhparam_bits }}.pem
+    owner: root
+    group: root
+    mode: "0644"
   notify: Restart nginx
 
 - name: Write nginx.conf
-  template:
+  ansible.builtin.template:
     src: nginx.conf.j2
     dest: /etc/nginx/nginx.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart nginx
 
 - name: Write fastcgi_params
-  template:
+  ansible.builtin.template:
     src: fastcgi_params.j2
     dest: /etc/nginx/fastcgi_params
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart nginx
 
 - name: Remove dist servers
-  file: "dest=/etc/nginx/{{ item }} state=absent"
+  ansible.builtin.file:
+    dest: "/etc/nginx/{{ item }}"
+    state: absent
   with_items:
     - conf.d/default.conf
     - conf.d/default
@@ -78,7 +79,9 @@
   notify: Restart nginx
 
 - name: Remove default server
-  file: "dest=/etc/nginx/{{ item }} state=absent"
+  ansible.builtin.file:
+    dest: "/etc/nginx/{{ item }}"
+    state: absent
   with_items:
     - sites-available/default.conf
     - sites-enabled/default.conf
@@ -86,17 +89,17 @@
   notify: Restart nginx
 
 - name: Write default server
-  copy:
+  ansible.builtin.copy:
     src: default.conf
     dest: /etc/nginx/sites-available/default.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   when: nginx_set_default_server | bool
   notify: Restart nginx
 
 - name: Activate default server
-  file:
+  ansible.builtin.file:
     src: /etc/nginx/sites-available/default.conf
     dest: /etc/nginx/sites-enabled/default.conf
     state: link
@@ -104,17 +107,17 @@
   notify: Restart nginx
 
 - name: Write other servers
-  template:
+  ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "/etc/nginx/sites-available/{{ item.name }}.conf"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   with_items: "{{ nginx_server_templates }}"
   notify: Restart nginx
 
 - name: Activate other servers
-  file:
+  ansible.builtin.file:
     src: "/etc/nginx/sites-available/{{ item.name }}.conf"
     dest: "/etc/nginx/sites-enabled/{{ item.name }}.conf"
     state: link

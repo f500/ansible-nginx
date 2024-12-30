@@ -7,35 +7,38 @@ nginx_worker_processes: "{{ ansible_processor_count }}"
 nginx_pid: "/var/run/nginx.pid"
 nginx_www_dir: "/var/www"
 
-nginx_use_realpath_root: no
-nginx_php_force_cgi_redirect: no
-nginx_set_default_server: yes
+nginx_use_realpath_root: false
+nginx_php_force_cgi_redirect: false
+nginx_set_default_server: true
 
 nginx_dhparam_bits: 4096
 
 nginx_http_params_default:
   server_names_hash_bucket_size: 64
-  server_tokens: off
+  server_tokens: false
 
-  sendfile: on
-  tcp_nopush: on
-  tcp_nodelay: on
+  sendfile: true
+  tcp_nopush: true
+  tcp_nodelay: true
 
-  gzip: on
+  gzip: true
   gzip_disable: "msie6"
   gzip_min_length: 256
-  gzip_types: application/json application/vnd.ms-fontobject application/x-font-ttf application/x-javascript application/xml application/xml+rss font/opentype image/svg+xml image/x-icon text/css text/javascript text/plain text/xml
+  gzip_types: >
+    application/json application/vnd.ms-fontobject application/x-font-ttf
+    application/x-javascript application/xml application/xml+rss font/opentype  image/svg+xml
+    image/x-icon text/css text/javascript text/plain text/xml
 
   ssl_ciphers: "HIGH:!aNULL:!MD5"
   ssl_dhparam: "/etc/nginx/dh{{ nginx_dhparam_bits }}.pem"
-  ssl_prefer_server_ciphers: on
+  ssl_prefer_server_ciphers: true
   ssl_protocols: TLSv1.2 TLSv1.3
   ssl_session_cache: shared:SSL:50m
-  ssl_session_tickets: off
+  ssl_session_tickets: false
   ssl_session_timeout: 1d
-  ssl_stapling: on
-  ssl_stapling_verify: on
-  resolver: "{{ ansible_dns.nameservers|join(' ') }} valid=300s"
+  ssl_stapling: true
+  ssl_stapling_verify: true
+  resolver: "{{ ansible_dns.nameservers | join(' ') }} valid=300s"
 
 nginx_http_headers_default:
   Content-Security-Policy: "default-src 'self'; form-action 'self'; frame-ancestors 'none'"
@@ -47,5 +50,4 @@ nginx_http_headers_default:
 
 nginx_http_params: {}
 nginx_http_headers: {}
-
 nginx_server_templates: []

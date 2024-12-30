@@ -155,6 +155,22 @@ Example Playbook
       roles:
       - { role: f500.nginx }
 
+Linting
+-------
+Github actions will check this role with ansible-lint. To run this locally, you will need to follow the following steps:
+
+```bash
+brew install ansible-lint
+brew install yamllint
+ansible-lint
+```
+
+to fix the linting errors, run:
+
+```bash
+ansible-lint --fix
+```
+
 License
 -------
 
